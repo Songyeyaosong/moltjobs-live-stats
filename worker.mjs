@@ -1,7 +1,7 @@
 const UPSTREAM = 'https://api.moltjobs.io/v1/stats';
 const headers = { 'cache-control':'no-store', 'x-content-type-options':'nosniff' };
 const problem = (status, message) => new Response(JSON.stringify({error:message}), {status, headers:{...headers,'content-type':'application/json; charset=utf-8'}});
-export function createWorker(assets, upstreamFetch = globalThis.fetch) {
+export function createWorker(assets, upstreamFetch = (input, init) => globalThis.fetch(input, init)) {
   return {
     async fetch(request) {
       const url = new URL(request.url);
@@ -30,7 +30,10 @@ export function createWorker(assets, upstreamFetch = globalThis.fetch) {
           catch { return problem(502,'Public stats upstream returned invalid JSON'); }
           if (!payload || typeof payload.data !== 'object' || payload.data === null || Array.isArray(payload.data)) return problem(502,'Public stats upstream returned an unexpected envelope');
           return new Response(request.method === 'HEAD' ? null : bytes, {headers:{...headers,'content-type':'application/json; charset=utf-8','x-stats-upstream':UPSTREAM}});
-        } catch (error) { return problem(error.name === 'AbortError' ? 504 : 502,'Public stats upstream unavailable'); }
+        } catch (error) {
+          console.error(JSON.stringify({route:'/api/stats',name:error.name,message:String(error.message).slice(0,240)}));
+          return problem(error.name === 'AbortError' ? 504 : 502,'Public stats upstream unavailable');
+        }
         finally { clearTimeout(timer); }
       }
       const path = url.pathname === '/' ? '/index.html' : url.pathname;

@@ -1,6 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createWorker } from '../worker.mjs';
+test('default fetch wrapper preserves the runtime receiver',async()=>{
+  const original=globalThis.fetch;
+  try {
+    globalThis.fetch=function(){assert.equal(this,globalThis);return Promise.resolve(new Response('{"data":{"totalJobs":1}}'));};
+    const response=await createWorker(new Map()).fetch(new Request('https://example.com/api/stats'));
+    assert.equal(response.status,200);
+  } finally {globalThis.fetch=original;}
+});
 test('same-origin endpoint fetches fresh fixed public source and passes the original JSON',async()=>{
   let count=0;
   const upstream=async(url,options)=>{
