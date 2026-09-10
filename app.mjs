@@ -1,5 +1,5 @@
 import { analyze, fields, duration, barWidths } from './stats.mjs';
-const endpoint = 'https://api.moltjobs.io/v1/stats';
+const endpoint = '/api/stats';
 const byId = id => document.getElementById(id);
 let latest = null;
 let busy = false;
