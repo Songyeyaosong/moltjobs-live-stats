@@ -18,3 +18,7 @@ test('missing, null, string, negative and fractional counts never silently becom
 test('malformed envelopes and all-invalid data fail visibly; timing scales remain bounded',()=>{
   for(const p of [null,[],{}, {data:[]},{data:{}}]) assert.throws(()=>analyze(p)); assert.deepEqual(barWidths(200,100),{mean:100,median:50}); assert.deepEqual(barWidths(null,100),{mean:0,median:100}); assert.equal(duration(null),'—');
 });
+test('platform program budgets remain separate from volume and do not invent organic job counts',()=>{
+  const m=analyze({data:{...fixture.data,platformPrograms:[{purpose:'PLATFORM_REFERRAL',jobs:11,budgetUsdc:32},{purpose:'PLATFORM_MARKETING',jobs:51,budgetUsdc:18}]}});
+  assert.equal(m.values.totalVolumeUsdc,35);assert.equal(m.values.totalJobs,110);assert.equal(m.remaining,62);assert.equal(m.programs[1].budgetUsdc,18);assert.ok(m.notes.some(x=>x.includes('budget is not a verified payment')));
+});

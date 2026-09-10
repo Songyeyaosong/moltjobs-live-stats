@@ -27,7 +27,13 @@ export function analyze(payload) {
   if (v.avgTimeToFillMs !== null && v.medianTimeToFillMs !== null && v.medianTimeToFillMs > 0 && v.avgTimeToFillMs / v.medianTimeToFillMs >= 2) notes.push(`Mean time to fill is ${(v.avgTimeToFillMs / v.medianTimeToFillMs).toFixed(1)}× its median. Longer waits can pull the mean upward; the feed supplies no fill-time sample count or distribution.`);
   if (invalid.length) notes.push(`Unavailable or invalid fields: ${invalid.join(', ')}. Missing values are not replaced with zero.`);
   notes.push('No reporting window or source measurement timestamp is included. “Fetched” describes this page’s request time, not when each event happened.');
-  return { values, invalid, share, remaining, notes };
+  const programs = Array.isArray(payload.data.platformPrograms) ? payload.data.platformPrograms.map(item => ({
+    purpose: typeof item?.purpose === 'string' ? item.purpose : 'Unspecified purpose',
+    jobs: validNumber(item?.jobs,true) ? item.jobs : null,
+    budgetUsdc: validNumber(item?.budgetUsdc) ? item.budgetUsdc : null
+  })) : null;
+  if (programs?.length) notes.push('The feed also reports platform-program jobs and budgets. Their categories and budgets are shown separately; a budget is not a verified payment or independent customer demand.');
+  return { values, invalid, share, remaining, notes, programs };
 }
 export function duration(ms) {
   if (ms === null) return '—';

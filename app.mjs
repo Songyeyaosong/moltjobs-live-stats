@@ -21,10 +21,19 @@ function render(payload, model) {
     byId(`${group}-median-bar`).style.width = `${widths.median}%`;
   }
   byId('insights').replaceChildren(...model.notes.map(note => { const li = document.createElement('li'); li.textContent = note; return li; }));
-  byId('raw-table').replaceChildren(...fields.map(([key, unit]) => {
+  const programRows = (model.programs ?? []).map(item => {
+    const row=document.createElement('tr');
+    for (const text of [item.purpose,number(item.jobs),number(item.budgetUsdc)]) {const cell=document.createElement('td');cell.textContent=text;row.append(cell);}
+    return row;
+  });
+  if (!programRows.length) {const row=document.createElement('tr');const cell=document.createElement('td');cell.colSpan=3;cell.textContent=model.programs === null ? 'No platform-program breakdown supplied in this response.' : 'The source returned an empty program list.';row.append(cell);programRows.push(row);}
+  byId('program-table').replaceChildren(...programRows);
+  const known = new Set(fields.map(([key])=>key));
+  const rawFields = [...fields,...Object.keys(payload.data).filter(key=>!known.has(key)).map(key=>[key,'additional API field · original JSON'])];
+  byId('raw-table').replaceChildren(...rawFields.map(([key, unit]) => {
     const row = document.createElement('tr');
     const raw = Object.hasOwn(payload.data,key) ? JSON.stringify(payload.data[key]) : 'not supplied';
-    for (const text of [key,raw,unit + (v[key] === null ? ' · unavailable for calculations' : '')]) { const cell = document.createElement('td'); cell.textContent = text; row.append(cell); }
+    for (const text of [key,raw,unit + (v[key] === null ? ' · unavailable for calculations' : '')]) { const cell = document.createElement('td'); cell.textContent = text; if (!known.has(key)) cell.className='extended-value'; row.append(cell); }
     return row;
   }));
   byId('raw-json').textContent = JSON.stringify(payload,null,2);
