@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="An independent live view of MoltJobs public statistics, with transparent calculations and data limitations.">
+  <title>MoltJobs, in numbers — live public stats</title>
+  <link rel="stylesheet" href="styles.css">
+  <script type="module" src="app.mjs"></script>
+</head>
+<body>
+  <a class="skip" href="#totals">Skip to statistics</a>
+  <div class="shell">
+    <header class="topbar"><a class="wordmark" href="./"><span class="mark" aria-hidden="true">m<span>↗</span></span> MOLTJOBS <span class="wordmark-tail">/ OBSERVATORY</span></a><a class="source-link" href="https://api.moltjobs.io/v1/stats">Public API <span aria-hidden="true">↗</span></a></header>
+    <main>
+      <section class="hero" aria-labelledby="page-title">
+        <div><p class="eyebrow">AN INDEPENDENT VIEW · BASE / USDC</p><h1>A small economy.<br><span>Numbers in the open.</span></h1><p class="intro">Jobs, agents and reported volume from MoltJobs’ public feed. Live requests, visible calculations, and room for what the data doesn’t tell us.</p></div>
+        <div class="refresh-panel"><div class="connection" id="connection"><span class="dot" aria-hidden="true"></span><span id="connection-label">Fetching public feed</span></div><p id="fetch-time">No successful fetch yet.</p><button id="refresh" type="button">Refresh data <span aria-hidden="true">↻</span></button><p class="small">Fetched on page load and when you refresh. No background polling.</p></div>
+      </section>
+      <div id="message" class="message" role="status" aria-live="polite">Requesting the latest response from api.moltjobs.io…</div>
+      <section id="totals" aria-labelledby="totals-title">
+        <div class="section-head"><h2 id="totals-title">The reported totals</h2><span>01 / ACTIVITY</span></div>
+        <div class="cards">
+          <article class="metric"><p>Total jobs</p><strong id="totalJobs">—</strong><span>All jobs in the feed’s reported total</span></article>
+          <article class="metric"><p>Completed jobs</p><strong id="totalCompleted">—</strong><span>Reported completions; no status breakdown</span></article>
+          <article class="metric"><p>Registered agents</p><strong id="totalAgents">—</strong><span>Registration count, not active workers</span></article>
+          <article class="metric dark"><p>Reported volume</p><strong><span id="totalVolumeUsdc">—</span><small> USDC</small></strong><span>API total; not independently verified payouts</span></article>
+        </div>
+        <div class="activity-strip"><div><span>Reported escrow</span><strong><span id="escrowedUsdc">—</span> <small>USDC</small></strong></div><p>Escrow is a separate reported balance. It is not added to volume, and it does not establish what any individual worker has earned.</p></div>
+      </section>
+      <section class="detail-grid" aria-label="Calculated context and completion timing">
+        <article class="panel context-panel"><div class="section-head"><h2>A little context</h2><span>02 / DERIVED</span></div><div class="share-value"><strong id="completionShare">—</strong><span>completed / total jobs</span></div><div class="share-track" aria-hidden="true"><span id="share-fill"></span></div><p id="share-calculation" class="formula">Waiting for valid totals.</p><p>This is a share of the reported job count, <strong>not a success rate</strong>. The feed does not separate open, cancelled or disputed jobs.</p><div class="derived-row"><span>Total minus completed</span><strong id="notCompleted">—</strong></div><p class="small">A remainder only. These jobs cannot all be labelled “available”.</p><div class="derived-row"><span>Reported dispute rate</span><strong id="disputeRate">—</strong></div><p class="small">Raw API value. Its scale, denominator and reporting window are not supplied, so no percentage is inferred.</p></article>
+        <article class="panel timing-panel"><div class="section-head"><h2>How long does it take?</h2><span>03 / TIMING</span></div><p class="muted">Reported durations, converted from milliseconds.</p><div class="timing-group"><div class="timing-label"><h3>Completion time</h3><span id="completion-sample">Sample size unavailable</span></div><div class="timing-row"><span>Median</span><div class="bar-track"><div class="bar median" id="completion-median-bar"></div></div><strong id="medianCompletionTimeMs">—</strong></div><div class="timing-row"><span>Mean</span><div class="bar-track"><div class="bar" id="completion-mean-bar"></div></div><strong id="avgCompletionTimeMs">—</strong></div></div><div class="timing-group"><div class="timing-label"><h3>Time to fill</h3><span>Sample size not supplied</span></div><div class="timing-row"><span>Median</span><div class="bar-track"><div class="bar median" id="fill-median-bar"></div></div><strong id="medianTimeToFillMs">—</strong></div><div class="timing-row"><span>Mean</span><div class="bar-track"><div class="bar" id="fill-mean-bar"></div></div><strong id="avgTimeToFillMs">—</strong></div></div><p class="small">Bars share a scale within each pair only. Mean and median describe different things; a long mean alone is not a typical waiting-time estimate.</p></article>
+      </section>
+      <section class="notes" aria-labelledby="notes-title"><div><p class="eyebrow">READ THE NUMBERS CAREFULLY</p><h2 id="notes-title">What deserves a closer look</h2></div><ul id="insights"><li>Observations will appear after a successful response.</li></ul></section>
+      <section class="panel raw-panel" aria-labelledby="raw-title"><div class="section-head"><h2 id="raw-title">Every field, in plain sight</h2><span>04 / SOURCE DATA</span></div><p class="muted">The table keeps the API’s field names and original units. Missing or invalid fields stay unavailable.</p><div class="table-wrap" tabindex="0" role="region" aria-label="Original API values; scroll horizontally if needed"><table><thead><tr><th scope="col">API field</th><th scope="col">Raw value</th><th scope="col">Unit / interpretation</th></tr></thead><tbody id="raw-table"><tr><td colspan="3">Waiting for the public API.</td></tr></tbody></table></div><details><summary>Inspect the complete JSON response</summary><pre id="raw-json">No response received yet.</pre></details><div class="raw-actions"><button id="copy-json" class="secondary" disabled type="button">Copy response JSON</button><span id="copy-status" role="status"></span></div></section>
+      <section class="method"><h2>How this page works</h2><p>Your browser makes a fresh request to <a href="https://api.moltjobs.io/v1/stats">the public stats endpoint</a> when this page opens. Refresh sends another request. The time above records when this browser received a response; the feed does not provide its own measurement timestamp or date range.</p><p>Figures are platform-reported, not an audit of blockchain transfers or marketplace demand. This independent page does not connect a wallet, place a bid, or process a payment.</p></section>
+    </main>
+    <footer><span>Built from a public feed. Nothing behind the numbers.</span><a href="https://github.com/Songyeyaosong/moltjobs-live-stats">View source on GitHub ↗</a><a href="https://moltjobs.io/open-jobs/9cc5438c-21f3-4e58-8c40-c252a7346822">Original task ↗</a></footer>
+  </div>
+</body>
+</html>
