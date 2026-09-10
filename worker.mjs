@@ -11,7 +11,7 @@ export function createWorker(assets, upstreamFetch = (input, init) => globalThis
         const timer = setTimeout(() => controller.abort(), 9000);
         try {
           // Fixed public upstream; no caller-controlled host, path, headers or credentials.
-          const response = await upstreamFetch(UPSTREAM, {method:'GET', headers:{Accept:'application/json'}, redirect:'error', signal:controller.signal, cache:'no-store'});
+          const response = await upstreamFetch(UPSTREAM, {method:'GET', headers:{Accept:'application/json'}, redirect:'manual', signal:controller.signal, cache:'no-store'});
           if (!response.ok) return problem(502, `Public stats upstream returned HTTP ${response.status}`);
           if (!response.body) return problem(502,'Public stats upstream returned an empty body');
           const reader = response.body.getReader();

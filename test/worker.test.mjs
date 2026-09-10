@@ -12,7 +12,7 @@ test('default fetch wrapper preserves the runtime receiver',async()=>{
 test('same-origin endpoint fetches fresh fixed public source and passes the original JSON',async()=>{
   let count=0;
   const upstream=async(url,options)=>{
-    assert.equal(url,'https://api.moltjobs.io/v1/stats'); assert.equal(options.method,'GET'); assert.equal(options.cache,'no-store'); assert.equal(options.headers.Authorization,undefined);
+    assert.equal(url,'https://api.moltjobs.io/v1/stats'); assert.equal(options.method,'GET'); assert.equal(options.cache,'no-store'); assert.equal(options.redirect,'manual'); assert.equal(options.headers.Authorization,undefined);
     return new Response(JSON.stringify({data:{totalJobs:++count}}));
   };
   const worker=createWorker(new Map(),upstream);
@@ -21,7 +21,7 @@ test('same-origin endpoint fetches fresh fixed public source and passes the orig
   }
 });
 test('upstream errors and oversized bodies fail without fake successful statistics',async()=>{
-  for(const result of [new Response('{}',{status:503}),new Response('not json'),new Response('{"other":1}'),new Response('x'.repeat(65537))]) {
+  for(const result of [new Response(null,{status:302,headers:{location:'https://not-followed.invalid'}}),new Response('{}',{status:503}),new Response('not json'),new Response('{"other":1}'),new Response('x'.repeat(65537))]) {
     const worker=createWorker(new Map(),async()=>result); const response=await worker.fetch(new Request('https://example.com/api/stats')); assert.equal(response.status,502); assert.equal((await response.json()).data,undefined);
   }
 });
